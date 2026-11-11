@@ -1,26 +1,356 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+/* The site is dark-only, so `dark:` variants always apply. */
+@custom-variant dark (&:where(:root, :root *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens
+   --------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  /* Brand palette */
+  --bg: #050308;
+  --surface: #0d0918;
+  --raised: #120c20;
+  --line: #221a38;
+  --line-strong: #2a2142;
+  --fg: #e9e6f2;
+  --fg-muted: #b8b0cc; /* ~9.9:1 on --bg */
+  --brand: #7c3aed; /* fills only: 3.5:1 as text, too low */
+  --brand-glow: #8b5cf6;
+  --brand-light: #a78bfa; /* ~7.4:1 on --bg, safe for accent text */
+
+  /* shadcn/ui semantic tokens mapped onto the palette */
+  --background: var(--bg);
+  --foreground: var(--fg);
+  --card: var(--surface);
+  --card-foreground: var(--fg);
+  --popover: var(--raised);
+  --popover-foreground: var(--fg);
+  --primary: var(--brand);
+  --primary-foreground: #ffffff;
+  --secondary: var(--raised);
+  --secondary-foreground: var(--fg);
+  --muted: var(--raised);
+  --muted-foreground: var(--fg-muted);
+  --accent: var(--raised);
+  --accent-foreground: var(--fg);
+  --destructive: #f87171;
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--brand-light);
+  --radius: 0.875rem;
+
+  --chart-1: var(--brand-light);
+  --chart-2: var(--brand-glow);
+  --chart-3: var(--brand);
+  --chart-4: #6d28d9;
+  --chart-5: #4c1d95;
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--fg);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--raised);
+  --sidebar-accent-foreground: var(--fg);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--brand-light);
 }
 
 @theme inline {
+  /* Fonts (variables come from next/font in layout.tsx) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+
+  /* Brand utilities: bg-bg, bg-surface, text-fg-muted, border-line, text-brand-light ... */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-brand: var(--brand);
+  --color-brand-glow: var(--brand-glow);
+  --color-brand-light: var(--brand-light);
+
+  /* shadcn/ui */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply bg-bg font-sans text-fg antialiased;
+    scroll-padding-top: 6rem;
+
+    @media (prefers-reduced-motion: no-preference) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply bg-bg text-fg;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-tight text-balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--brand) 55%, transparent);
+    color: #fff;
+  }
+
+  /* Visible focus ring everywhere (≥3:1 against the dark background). */
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--brand-light);
+    outline-offset: 3px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------------------------------------------------------------------------
+   Reusable surfaces
+   --------------------------------------------------------------------------- */
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  /* Glass surface: translucent fill, soft border, inner highlight on the top edge. */
+  .glass {
+    background-color: rgb(255 255 255 / 0.04);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+  }
+
+  /* Same look without the blur, for large areas where blur costs too much. */
+  .glass-flat {
+    background-color: rgb(255 255 255 / 0.03);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.07);
+  }
+
+  .glow-hover {
+    transition:
+      border-color 300ms var(--ease-out-expo),
+      box-shadow 300ms var(--ease-out-expo);
+
+    &:hover,
+    &:focus-within {
+      border-color: color-mix(in oklab, var(--brand-light) 35%, transparent);
+      box-shadow:
+        inset 0 1px 0 0 rgb(255 255 255 / 0.1),
+        0 0 0 1px color-mix(in oklab, var(--brand-glow) 15%, transparent),
+        0 18px 60px -20px color-mix(in oklab, var(--brand-glow) 55%, transparent);
+    }
+  }
+
+  /* Italic serif phrase inside big headlines. */
+  .headline-accent {
+    @apply font-serif font-normal italic text-fg-muted;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero
+   The on-load entrance is plain CSS rather than Motion so it starts on first
+   paint, before any JavaScript loads (keeps LCP fast on mobile). Everything
+   here is opt-in: with reduced motion the hero is simply static.
+   --------------------------------------------------------------------------- */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* Headline variant: no opacity change. Chrome ignores opacity:0 elements as
+   LCP candidates, so the largest text must be visible from the first paint. */
+@keyframes hero-in-visible {
+  from {
+    transform: translateY(18px);
+    filter: blur(12px);
+  }
+  to {
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--twinkle-low, 0.2);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes horizon-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.012);
+  }
+}
+
+@keyframes shooting-star {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) rotate(-24deg) scaleX(0.2);
+  }
+  3% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0;
+    transform: translate3d(-42vw, 18vw, 0) rotate(-24deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-42vw, 18vw, 0) rotate(-24deg) scaleX(1);
+  }
+}
+
+@layer components {
+  .hero-in {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: hero-in 1s var(--ease-out-expo) both;
+      animation-delay: calc(120ms + var(--i, 0) * 120ms);
+    }
+  }
+
+  .hero-in-lcp {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: hero-in-visible 1s var(--ease-out-expo) both;
+      animation-delay: calc(60ms + var(--i, 0) * 120ms);
+    }
+  }
+
+  .star-layer {
+    opacity: 0.85;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: twinkle var(--twinkle-duration, 5s) ease-in-out var(--twinkle-delay, 0s) infinite;
+    }
+  }
+
+  .shooting-star {
+    opacity: 0;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: shooting-star 11s linear 3s infinite;
+    }
+  }
+
+  .horizon-glow {
+    transform: translateX(-50%);
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: horizon-pulse 6s ease-in-out infinite;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Marquee ticker: two identical copies slide left by half the track width.
+   Pauses on hover/focus and via the pause button (WCAG 2.2.2).
+   --------------------------------------------------------------------------- */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@layer components {
+  .marquee-track {
+    width: max-content;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: marquee 38s linear infinite;
+    }
+
+    .marquee:hover &,
+    .marquee:focus-within &,
+    .marquee[data-paused="true"] & {
+      animation-play-state: paused;
+    }
+  }
+
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgb(233 230 242 / 0.55);
+  }
 }
