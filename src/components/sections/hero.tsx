@@ -24,7 +24,7 @@ export function Hero() {
         {/* Badge */}
         <a
           href="#projects"
-          className="hero-in glass group inline-flex items-center gap-2.5 rounded-full py-1.5 pr-3 pl-1.5 text-[13px] text-fg-muted transition-colors hover:border-white/20 hover:text-fg sm:text-sm"
+          className="hero-in glass-flat group inline-flex items-center gap-2.5 rounded-full py-1.5 pr-3 pl-1.5 text-[13px] text-fg-muted transition-colors hover:border-white/20 hover:text-fg sm:text-sm"
           style={step(0)}
         >
           <span className="rounded-full bg-brand px-2.5 py-0.5 text-xs font-semibold text-white shadow-[0_0_16px_-2px_var(--brand-glow)]">

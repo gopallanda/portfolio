@@ -179,8 +179,8 @@
     background-color: rgb(255 255 255 / 0.04);
     border: 1px solid rgb(255 255 255 / 0.1);
     box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.08);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
   }
 
   /* Same look without the blur, for large areas where blur costs too much. */
@@ -205,6 +205,53 @@
     }
   }
 
+  /* Pointer-following glow + lit border (variables set by <Spotlight>). */
+  .spotlight {
+    position: relative;
+    isolation: isolate;
+
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 400ms var(--ease-out-expo);
+    }
+
+    &::before {
+      z-index: -1;
+      background: radial-gradient(
+        440px circle at var(--mx, 50%) var(--my, 0%),
+        rgb(139 92 246 / 0.13),
+        transparent 60%
+      );
+    }
+
+    /* Only the 1px border ring is painted, via a masked gradient. */
+    &::after {
+      padding: 1px;
+      background: radial-gradient(
+        280px circle at var(--mx, 50%) var(--my, 0%),
+        rgb(196 181 253 / 0.6),
+        transparent 65%
+      );
+      mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask-composite: exclude;
+    }
+
+    @media (hover: hover) {
+      &:hover::before,
+      &:hover::after {
+        opacity: 1;
+      }
+    }
+  }
+
   /* Italic serif phrase inside big headlines. */
   .headline-accent {
     @apply font-serif font-normal italic text-fg-muted;
@@ -222,7 +269,7 @@
   from {
     opacity: 0;
     transform: translateY(18px);
-    filter: blur(10px);
+    filter: blur(6px);
   }
   to {
     opacity: 1;
@@ -235,12 +282,10 @@
    LCP candidates, so the largest text must be visible from the first paint. */
 @keyframes hero-in-visible {
   from {
-    transform: translateY(18px);
-    filter: blur(12px);
+    transform: translateY(22px);
   }
   to {
     transform: none;
-    filter: blur(0);
   }
 }
 
@@ -258,11 +303,9 @@
   0%,
   100% {
     opacity: 0.75;
-    transform: translateX(-50%) scale(1);
   }
   50% {
     opacity: 1;
-    transform: translateX(-50%) scale(1.012);
   }
 }
 
@@ -321,6 +364,125 @@
     @media (prefers-reduced-motion: no-preference) {
       animation: horizon-pulse 6s ease-in-out infinite;
     }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll-driven effects (CSS only, no JavaScript).
+   Purely decorative, so they are progressive enhancement: browsers without
+   scroll-driven animations simply show the static layout.
+   --------------------------------------------------------------------------- */
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes step-on {
+  from {
+    border-color: rgb(255 255 255 / 0.12);
+    box-shadow: 0 0 0 6px var(--bg);
+    color: var(--fg-muted);
+  }
+  to {
+    border-color: rgb(196 181 253 / 0.7);
+    box-shadow:
+      0 0 0 6px var(--bg),
+      0 0 34px -4px var(--brand-glow);
+    color: var(--fg);
+  }
+}
+
+@layer components {
+  /* Thin reading-progress bar under the navbar. Hidden where unsupported. */
+  .scroll-progress {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: scroll()) {
+      .scroll-progress {
+        display: block;
+        position: fixed;
+        inset: 0 0 auto;
+        z-index: 60;
+        height: 2px;
+        background: linear-gradient(90deg, var(--brand), var(--brand-light), #e9d5ff);
+        box-shadow: 0 0 12px var(--brand-glow);
+        transform-origin: 0 50%;
+        animation: grow-x linear both;
+        animation-timeline: scroll(root block);
+      }
+    }
+
+    @supports ((animation-timeline: view()) and (animation-range: entry)) {
+      /* "How I work": the connector fills and each step lights up as it scrolls into view. */
+      .process-line-x {
+        transform-origin: 0 50%;
+        animation: grow-x linear both;
+        animation-timeline: view();
+        animation-range: entry 100% cover 60%;
+      }
+
+      .process-line-y {
+        transform-origin: 50% 0;
+        animation: grow-y linear both;
+        animation-timeline: view();
+        animation-range: entry 30% cover 70%;
+      }
+
+      .process-step {
+        animation: step-on linear both;
+        animation-timeline: view();
+        animation-range: entry 100% cover 45%;
+      }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Page transitions (React <ViewTransition>): the project screenshot morphs
+   from the home card into the case study hero. Softened with a brief blur.
+   --------------------------------------------------------------------------- */
+::view-transition-group(.morph) {
+  animation-duration: 550ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+::view-transition-image-pair(.morph) {
+  animation-name: via-blur;
+}
+
+@keyframes via-blur {
+  30% {
+    filter: blur(3px);
+  }
+}
+
+/* Everything else crossfades quickly between pages. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
 

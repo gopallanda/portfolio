@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import * as m from "motion/react-m";
-import { useReducedMotion, useScroll, useTransform } from "motion/react";
-import { useRef, type CSSProperties } from "react";
+import { useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { useRef, ViewTransition, type CSSProperties, type PointerEvent } from "react";
 import { cn } from "cn";
 import type { Project } from "@/data/projects";
 import { tints } from "@/lib/tints";
@@ -27,6 +27,24 @@ export function ProjectShowcase({ project, href }: { project: Project; href: str
   const tint = tints[project.tint];
   const isExternal = href.startsWith("http");
 
+  // Subtle 3D tilt toward the pointer (mouse only, off for reduced motion).
+  const tiltX = useMotionValue(0);
+  const tiltY = useMotionValue(0);
+  const rotateX = useSpring(tiltX, { stiffness: 160, damping: 18 });
+  const rotateY = useSpring(tiltY, { stiffness: 160, damping: 18 });
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (reduce || e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    tiltY.set(px * 7);
+    tiltX.set(-py * 7);
+  };
+  const resetTilt = () => {
+    tiltX.set(0);
+    tiltY.set(0);
+  };
+
   return (
     <m.div
       ref={ref}
@@ -35,12 +53,18 @@ export function ProjectShowcase({ project, href }: { project: Project; href: str
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
+      <m.div
+        style={{ rotateX, rotateY, transformPerspective: 1200 }}
+        onPointerMove={onPointerMove}
+        onPointerLeave={resetTilt}
+      >
       {/* The whole card is a shortcut to the same destination as the panel button.
           It is skipped by keyboard and screen readers to avoid a duplicate link. */}
       <Link
         href={href}
         tabIndex={-1}
         aria-hidden
+        prefetch={isExternal ? undefined : true}
         {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         className={cn(
           "group relative isolate flex h-[26rem] flex-col overflow-hidden rounded-[2rem] border border-white/10 p-6 sm:h-[34rem] sm:p-9",
@@ -81,16 +105,19 @@ export function ProjectShowcase({ project, href }: { project: Project; href: str
           )}
 
           <m.div style={{ y: frontY }} className="relative mt-12 w-[112%] sm:mt-16">
-            <BrowserFrame url={hostFor(project)}>
-              <Image
-                src={project.cover.src}
-                alt={project.cover.alt}
-                width={project.cover.width}
-                height={project.cover.height}
-                sizes="(min-width: 1024px) 620px, 100vw"
-                className="h-auto w-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
-              />
-            </BrowserFrame>
+            {/* Same name as the case study hero, so the screenshot morphs into it on navigation. */}
+            <ViewTransition name={`cover-${project.slug}`} share="morph" default="none">
+              <BrowserFrame url={hostFor(project)}>
+                <Image
+                  src={project.cover.src}
+                  alt={project.cover.alt}
+                  width={project.cover.width}
+                  height={project.cover.height}
+                  sizes="(min-width: 1024px) 620px, 100vw"
+                  className="h-auto w-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.03] motion-reduce:transition-none"
+                />
+              </BrowserFrame>
+            </ViewTransition>
           </m.div>
         </div>
 
@@ -100,6 +127,7 @@ export function ProjectShowcase({ project, href }: { project: Project; href: str
           className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/50 to-transparent"
         />
       </Link>
+      </m.div>
     </m.div>
   );
 }

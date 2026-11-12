@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import type { CSSProperties } from "react";
-import type { CaseStudy, Project } from "@/data/projects";
+import { ViewTransition, type CSSProperties } from "react";
+import { isFilled, type CaseStudy, type Project } from "@/data/projects";
 import { BrowserFrame } from "@/components/ui/browser-frame";
 import { TechBadge } from "@/components/ui/tech-badge";
 import { Starfield } from "@/components/motion/starfield";
@@ -10,14 +10,15 @@ import { Starfield } from "@/components/motion/starfield";
 const step = (i: number) => ({ "--i": i }) as CSSProperties;
 
 export function CaseStudyHeader({ project, caseStudy }: { project: Project; caseStudy: CaseStudy }) {
-  const meta = [
+  const meta: { label: string; value: string; sub?: string }[] = [
     project.kind === "Client"
       ? { label: "Client", value: project.client }
       : { label: "Product", value: project.client, sub: project.kind },
     { label: "My role", value: caseStudy.role },
     { label: "Timeline", value: caseStudy.timeline },
     { label: "Platforms", value: project.platforms },
-  ];
+  ].filter((item) => isFilled(item.value));
+  const metaCols = meta.length >= 4 ? "md:grid-cols-4" : "md:grid-cols-3";
 
   return (
     <header className="relative isolate overflow-hidden pt-32 pb-12 sm:pt-40">
@@ -62,7 +63,7 @@ export function CaseStudyHeader({ project, caseStudy }: { project: Project; case
 
         {/* Meta row */}
         <dl
-          className="hero-in mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-4"
+          className={`hero-in mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 ${metaCols}`}
           style={step(3)}
         >
           {meta.map((item) => (
@@ -94,6 +95,8 @@ export function CaseStudyHeader({ project, caseStudy }: { project: Project; case
               aria-hidden
               className="absolute -inset-x-6 -top-6 bottom-10 -z-10 rounded-[3rem] bg-[radial-gradient(60%_60%_at_50%_30%,rgb(139_92_246/0.35),transparent_75%)] blur-2xl"
             />
+            {/* Pairs with the home page card cover: the screenshot morphs between them. */}
+            <ViewTransition name={`cover-${project.slug}`} share="morph" default="none">
             <BrowserFrame url={project.liveUrl ? new URL(project.liveUrl).host : undefined}>
               <Image
                 src={project.cover.src}
@@ -106,6 +109,7 @@ export function CaseStudyHeader({ project, caseStudy }: { project: Project; case
                 className="h-auto w-full"
               />
             </BrowserFrame>
+            </ViewTransition>
           </div>
           {project.cover.caption && (
             <figcaption className="mt-4 text-center text-sm text-fg-muted">{project.cover.caption}</figcaption>

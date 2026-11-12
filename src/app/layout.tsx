@@ -88,6 +88,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        {/* Reading-progress bar (CSS scroll-driven; hidden where unsupported). */}
+        <div aria-hidden className="scroll-progress" />
         <MotionProvider>
           <Navbar />
           <main id="main" className="flex-1">

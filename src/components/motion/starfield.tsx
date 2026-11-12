@@ -42,10 +42,15 @@ const LAYERS: LayerConfig[] = [
 
 const r2 = (n: number) => Math.round(n * 10) / 10;
 
+// Each star is a tiny background tile (a few px square) placed by percentage,
+// so the browser paints only those pixels. A full-size gradient per star would
+// make it paint ~100 full-screen images, which is slow without a fast GPU.
 function buildLayers() {
   const rand = prng(20261110);
   return LAYERS.map((layer) => {
-    const stars: string[] = [];
+    const images: string[] = [];
+    const sizes: string[] = [];
+    const positions: string[] = [];
     for (let i = 0; i < layer.count; i++) {
       const roll = rand();
       const x = r2(rand() * 100);
@@ -54,13 +59,21 @@ function buildLayers() {
       const tint = rand() > 0.72 ? "#cdbcff" : "#fff";
       if (roll > 0.93) {
         // Bright star with a soft halo
-        stars.push(`radial-gradient(4px 4px at ${x}% ${y}%,#fff,rgb(205 188 255/.55) 45%,transparent)`);
+        images.push("radial-gradient(circle,#fff,rgb(205 188 255/.55) 30%,transparent 70%)");
+        sizes.push("9px 9px");
       } else {
-        const s = roll > 0.65 ? 1.5 : 1;
-        stars.push(`radial-gradient(${s}px ${s}px at ${x}% ${y}%,${tint} 60%,transparent)`);
+        const s = roll > 0.65 ? 3 : 2;
+        images.push(`radial-gradient(circle,${tint} 45%,transparent 70%)`);
+        sizes.push(`${s}px ${s}px`);
       }
+      positions.push(`${x}% ${y}%`);
     }
-    return { ...layer, background: stars.join(",") };
+    return {
+      ...layer,
+      backgroundImage: images.join(","),
+      backgroundSize: sizes.join(","),
+      backgroundPosition: positions.join(","),
+    };
   });
 }
 
@@ -75,7 +88,9 @@ export function Starfield({ className }: { className?: string }) {
           className={cn("star-layer absolute inset-0 bg-no-repeat", layer.desktopOnly && "max-sm:hidden")}
           style={
             {
-              backgroundImage: layer.background,
+              backgroundImage: layer.backgroundImage,
+              backgroundSize: layer.backgroundSize,
+              backgroundPosition: layer.backgroundPosition,
               "--twinkle-duration": layer.duration,
               "--twinkle-delay": layer.delay,
               "--twinkle-low": layer.low,

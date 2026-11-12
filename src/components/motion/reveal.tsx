@@ -55,6 +55,27 @@ export function Reveal({ as = "div", className, children, id, delay = 0, y = 24 
 }
 
 /* ------------------------------------------------------------------------ */
+/* MaskReveal: text slides up from behind an invisible edge (headlines).    */
+/* ------------------------------------------------------------------------ */
+
+export function MaskReveal({ children, delay = 0 }: { children?: ReactNode; delay?: number }) {
+  return (
+    // The small bottom padding keeps descenders (g, p, y) from being clipped.
+    <span className="-mb-[0.14em] block overflow-hidden pb-[0.14em]">
+      <m.span
+        className="block"
+        initial={{ y: "110%", opacity: 0 }}
+        whileInView={{ y: "0%", opacity: 1 }}
+        viewport={viewport}
+        transition={{ duration: 0.9, ease: EASE, delay }}
+      >
+        {children}
+      </m.span>
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
 /* Stagger + StaggerItem: reveal a list one child after another.            */
 /* ------------------------------------------------------------------------ */
 

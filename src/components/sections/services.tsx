@@ -2,6 +2,7 @@ import { Bot, ChartColumnBig, Layers, LayoutGrid, Smartphone, type LucideIcon } 
 import { services, type ServiceIcon } from "@/data/home";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Stagger, StaggerItem } from "@/components/motion/reveal";
+import { Spotlight } from "@/components/motion/spotlight";
 
 const iconFor: Record<ServiceIcon, LucideIcon> = {
   dashboards: ChartColumnBig,
@@ -36,8 +37,11 @@ export function Services() {
             const Icon = iconFor[service.icon];
             return (
               <StaggerItem as="li" key={service.title} className="h-full">
-                <article className="glass glow-hover group flex h-full flex-col rounded-3xl p-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:hover:translate-y-0">
-                  <span className="relative grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-brand/40 to-brand/10 ring-1 ring-brand-light/30 shadow-[0_8px_30px_-10px_var(--brand-glow)]">
+                <Spotlight
+                  as="article"
+                  className="glass-flat group flex h-full flex-col rounded-3xl p-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 motion-reduce:hover:translate-y-0"
+                >
+                  <span className="relative grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-brand/40 to-brand/10 ring-1 ring-brand-light/30 shadow-[0_8px_30px_-10px_var(--brand-glow)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-6 group-hover:scale-110 motion-reduce:transition-none">
                     <Icon aria-hidden className="size-5 text-brand-light" />
                   </span>
                   <h3 className="mt-6 text-xl font-semibold tracking-tight">{service.title}</h3>
@@ -52,7 +56,7 @@ export function Services() {
                       </li>
                     ))}
                   </ul>
-                </article>
+                </Spotlight>
               </StaggerItem>
             );
           })}

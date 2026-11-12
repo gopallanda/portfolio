@@ -2,8 +2,11 @@ import { cn } from "cn";
 
 /**
  * A huge dark ellipse rising from the bottom of the hero, with a glowing
- * violet rim. The glow is a separate layer whose opacity and scale pulse
- * softly; the planet itself never repaints.
+ * violet rim. The glow is a separate layer whose opacity pulses softly.
+ *
+ * The glow is a radial-gradient ring rather than a big blurred box-shadow:
+ * gradients are cheap to paint, while a 200px blur over a ~2700px-wide shape
+ * kept the GPU busy for ~0.5s on load (worst on phones without a fast GPU).
  */
 export function Horizon({ className }: { className?: string }) {
   return (
@@ -11,12 +14,14 @@ export function Horizon({ className }: { className?: string }) {
       {/* Atmosphere: wide violet haze sitting just above the rim. */}
       <div className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(ellipse_70%_55%_at_50%_100%,rgb(124_58_237/0.38),transparent_70%)]" />
 
-      {/* Pulsing glow, same footprint as the planet. */}
+      {/* Pulsing glow: the planet's ellipse stretched taller (scale-y), with a
+          gradient ring that peaks just above the planet's top edge
+          (1 / 1.3 ≈ 77% of the stretched radius) and fades outward. */}
       <div
-        className="horizon-glow absolute left-1/2 top-[46%] sm:top-[48%] aspect-[2.2/1] w-[280vw] sm:aspect-[2.6/1] sm:w-[max(190vw,1300px)] rounded-[50%] will-change-transform"
+        className="horizon-glow absolute left-1/2 top-[46%] aspect-[2.2/1] w-[280vw] scale-x-[1.04] scale-y-[1.3] rounded-[50%] sm:top-[48%] sm:aspect-[2.6/1] sm:w-[max(190vw,1300px)]"
         style={{
-          boxShadow:
-            "0 -6px 30px 2px rgb(167 139 250 / 0.75), 0 -30px 90px 10px rgb(139 92 246 / 0.55), 0 -80px 200px 40px rgb(124 58 237 / 0.35)",
+          background:
+            "radial-gradient(closest-side, transparent 74%, rgb(196 181 253 / 0.85) 76.6%, rgb(139 92 246 / 0.55) 80%, rgb(124 58 237 / 0.22) 88%, transparent 100%)",
         }}
       />
 

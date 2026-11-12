@@ -57,20 +57,29 @@ export function Navbar() {
   const isHome = pathname === "/";
   const active = useActiveSection(sectionIds, isHome);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const { scrollY } = useScroll();
 
-  useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 24));
+  // Tuck the navbar away while reading down the page; bring it back on any
+  // upward scroll, near the top, or when keyboard focus moves into it.
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const prev = scrollY.getPrevious() ?? 0;
+    setScrolled(y > 24);
+    if (y < 140) setHidden(false);
+    else if (y > prev + 6) setHidden(true);
+    else if (y < prev - 6) setHidden(false);
+  });
 
   const hrefFor = (id: string) => (isHome ? `#${id}` : `/#${id}`);
   // On case study pages, keep "Projects" highlighted.
   const current = isHome ? active : pathname.startsWith("/projects/") ? "projects" : undefined;
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50">
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50" onFocusCapture={() => setHidden(false)}>
       <m.div
         className="container-page pointer-events-auto flex items-center justify-between gap-4 pt-4 md:pt-5"
-        animate={{ y: scrolled ? -6 : 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        animate={{ y: hidden ? "-140%" : scrolled ? -6 : 0 }}
+        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       >
         <Logo />
 

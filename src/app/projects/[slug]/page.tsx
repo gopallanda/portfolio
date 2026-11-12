@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
 import { Quote } from "lucide-react";
-import { caseStudyProjects, getProject } from "@/data/projects";
+import { caseStudyProjects, getProject, isFilled } from "@/data/projects";
 import { site } from "@/data/site";
 import { Reveal } from "@/components/motion/reveal";
 import { CaseStudyHeader } from "@/components/case-study/case-study-header";
@@ -80,33 +80,38 @@ async function CaseStudy({ params }: Pick<Props, "params">) {
 
   const all = caseStudyProjects();
   const next = all[(all.findIndex((p) => p.slug === project.slug) + 1) % all.length];
+  // The brief only shows once it has real content (not a "TODO" placeholder).
+  const hasBrief = isFilled(caseStudy.brief);
+  const n = (i: number) => (hasBrief ? i + 1 : i);
 
   return (
     <article>
       <CaseStudyHeader project={project} caseStudy={caseStudy} />
 
       <div className="container-page pb-24">
-        <Section index={1} title="The brief">
-          <Reveal className="glass-flat relative overflow-hidden rounded-[2rem] p-7 sm:p-10">
-            <Quote aria-hidden className="size-8 text-brand-light/70" />
-            <blockquote className="mt-4 max-w-3xl font-serif text-2xl leading-snug text-fg italic sm:text-3xl">
-              {caseStudy.brief}
-            </blockquote>
-            <p className="mt-6 text-sm text-fg-muted">
-              {project.kind === "Client" ? `The client, ${project.client.toLowerCase()}` : "The problem I set out to solve"}
-            </p>
-          </Reveal>
-        </Section>
+        {hasBrief && (
+          <Section index={1} title="The brief">
+            <Reveal className="glass-flat relative overflow-hidden rounded-[2rem] p-7 sm:p-10">
+              <Quote aria-hidden className="size-8 text-brand-light/70" />
+              <blockquote className="mt-4 max-w-3xl font-serif text-2xl leading-snug text-fg italic sm:text-3xl">
+                {caseStudy.brief}
+              </blockquote>
+              <p className="mt-6 text-sm text-fg-muted">
+                {project.kind === "Client" ? `The client, ${project.client.toLowerCase()}` : "The problem I set out to solve"}
+              </p>
+            </Reveal>
+          </Section>
+        )}
 
-        <Section index={2} title="Problems I solved">
+        <Section index={n(1)} title="Problems I solved">
           <ProblemCards problems={caseStudy.problems} />
         </Section>
 
-        <Section index={3} title="How it fits together">
+        <Section index={n(2)} title="How it fits together">
           <ArchitectureDiagram architecture={caseStudy.architecture} title={project.title} />
         </Section>
 
-        <Section index={4} title="Screens">
+        <Section index={n(3)} title="Screens">
           <ScreenGallery screens={project.gallery} projectTitle={project.title} />
         </Section>
 

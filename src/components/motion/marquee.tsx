@@ -54,7 +54,7 @@ export function Marquee({ name, words }: MarqueeProps) {
         type="button"
         onClick={() => setPaused((p) => !p)}
         aria-label={paused ? "Play ticker" : "Pause ticker"}
-        className="glass absolute right-3 bottom-2 grid size-8 place-items-center rounded-full text-fg-muted transition-colors hover:text-fg motion-reduce:hidden sm:right-5"
+        className="glass-flat absolute right-3 bottom-2 grid size-8 place-items-center rounded-full text-fg-muted transition-colors hover:text-fg motion-reduce:hidden sm:right-5"
       >
         {paused ? <Play aria-hidden className="size-3.5" /> : <Pause aria-hidden className="size-3.5" />}
       </button>

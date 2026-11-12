@@ -10,7 +10,7 @@ const variants: Record<Variant, string> = {
   primary: "bg-white text-[#0b0614] hover:bg-white/90 shadow-[0_8px_30px_-12px_rgb(255_255_255/0.5)]",
   brand:
     "bg-brand text-white hover:bg-brand-glow shadow-[0_10px_40px_-12px_var(--brand-glow),inset_0_1px_0_0_rgb(255_255_255/0.2)]",
-  glass: "glass text-fg hover:bg-white/[0.08] hover:border-white/20",
+  glass: "glass-flat text-fg hover:bg-white/[0.08] hover:border-white/20",
   ghost: "text-fg-muted hover:text-fg",
 };
 
@@ -35,6 +35,8 @@ interface ActionLinkProps extends Omit<ComponentProps<"a">, "href"> {
   /** "arrow" slides right on hover, "external" nudges up-right. */
   icon?: "arrow" | "external" | "none";
   leadingIcon?: ReactNode;
+  /** Internal links only: prefetch the full page (needed for the cover morph transition). */
+  prefetch?: boolean;
 }
 
 /**
@@ -47,6 +49,7 @@ export function ActionLink({
   size = "md",
   icon = "arrow",
   leadingIcon,
+  prefetch,
   className,
   children,
   ...props
@@ -77,7 +80,7 @@ export function ActionLink({
 
   if (isInternalRoute) {
     return (
-      <Link href={href} className={classes} {...props}>
+      <Link href={href} prefetch={prefetch} className={classes} {...props}>
         {content}
       </Link>
     );

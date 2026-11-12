@@ -380,4 +380,8 @@ export const projects: Project[] = [
 
 export const getProject = (slug: string) => projects.find((p) => p.slug === slug);
 
+/** True once a value has real content. "TODO…" placeholders are hidden on the live site. */
+export const isFilled = (value: string | undefined): value is string =>
+  Boolean(value && value.trim() && !value.trim().startsWith("TODO"));
+
 export const caseStudyProjects = () => projects.filter((p) => p.caseStudy);

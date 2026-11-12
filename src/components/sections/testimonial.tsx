@@ -1,19 +1,16 @@
 import { Quote } from "lucide-react";
-import { cn } from "cn";
 import { testimonial } from "@/data/home";
 import { Reveal } from "@/components/motion/reveal";
 
 export function Testimonial() {
+  // Hidden on the live site until a real quote replaces the placeholder
+  // (set `placeholder: false` in src/data/home.ts).
+  if (testimonial.placeholder) return null;
+
   return (
     <section aria-label="Client testimonial" className="relative py-20 sm:py-28">
       <div className="container-page">
-        <Reveal
-          className={cn(
-            "glass-flat relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] px-6 py-12 text-center sm:px-14 sm:py-16",
-            // A dashed edge marks the slot as a placeholder until a real quote is in.
-            testimonial.placeholder && "border-dashed",
-          )}
-        >
+        <Reveal className="glass-flat relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] px-6 py-12 text-center sm:px-14 sm:py-16">
           <div
             aria-hidden
             className="pointer-events-none absolute -top-24 left-1/2 h-48 w-[28rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(139_92_246/0.35),transparent)]"

@@ -51,7 +51,7 @@ export const site: SiteConfig = {
   tagline: "Building software that solves real business problems",
   description:
     "Dashboards, internal tools, mobile apps and SaaS on Next.js & Supabase. Lean to build, cheap to run, and made for how your business actually works.",
-  url: "https://example.com", // TODO: your production domain (no trailing slash)
+  url: "https://gopallanda.vercel.app", // production domain (no trailing slash)
   address: {
     city: "Berhampur",
     region: "Odisha",
