@@ -59,19 +59,24 @@ export function Reveal({ as = "div", className, children, id, delay = 0, y = 24 
 /* ------------------------------------------------------------------------ */
 
 export function MaskReveal({ children, delay = 0 }: { children?: ReactNode; delay?: number }) {
+  const textVariants: Variants = {
+    hidden: { y: "110%", opacity: 0 },
+    show: { y: "0%", opacity: 1, transition: { duration: 0.9, ease: EASE, delay } },
+  };
   return (
+    // The in-view trigger sits on the clipping wrapper, not the text: the text
+    // starts below the clip edge, so observing it directly would never fire.
     // The small bottom padding keeps descenders (g, p, y) from being clipped.
-    <span className="-mb-[0.14em] block overflow-hidden pb-[0.14em]">
-      <m.span
-        className="block"
-        initial={{ y: "110%", opacity: 0 }}
-        whileInView={{ y: "0%", opacity: 1 }}
-        viewport={viewport}
-        transition={{ duration: 0.9, ease: EASE, delay }}
-      >
+    <m.span
+      className="-mb-[0.14em] block overflow-hidden pb-[0.14em]"
+      initial="hidden"
+      whileInView="show"
+      viewport={viewport}
+    >
+      <m.span className="block" variants={textVariants}>
         {children}
       </m.span>
-    </span>
+    </m.span>
   );
 }
 
